@@ -11,6 +11,7 @@ import (
 	"tectone/tectone-desktop/internal/event"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -107,9 +108,39 @@ func ComposeRemove(ctx context.Context, path string) error {
 		return err
 	}
 
-	return cli.ContainerRemove(ctx, "", types.ContainerRemoveOptions{
-		RemoveVolumes: true,
-		RemoveLinks:   true,
-		Force:         true,
-	})
+	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{All: true})
+	if err != nil {
+		return err
+	}
+
+	indef := -1
+	for _, c := range containers {
+
+		// Stop the container and
+		if err := cli.ContainerStop(ctx, c.ID, container.StopOptions{Timeout: &indef}); err != nil {
+			return err
+		}
+	}
+
+	for _, c := range containers {
+		// remove container
+		if err := cli.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{RemoveVolumes: true, Force: true}); err != nil {
+			return err
+		}
+
+		// remove image
+		_, err := cli.ImageRemove(ctx, c.ImageID, types.ImageRemoveOptions{Force: true, PruneChildren: true})
+		if err != nil {
+			return err
+		}
+
+	}
+
+	return nil
+
+	// return cli.ContainerRemove(ctx, "", types.ContainerRemoveOptions{
+	// 	RemoveVolumes: true,
+	// 	RemoveLinks:   true,
+	// 	Force:         true,
+	// })
 }

@@ -49,9 +49,25 @@ export default function Splash() {
     init();
   }, []);
 
+  const style = {
+    draggable: {
+      "--wails-draggable": "drag",
+    } as React.CSSProperties,
+    undraggable: {
+      "--wails-draggable": "no-drag",
+    } as React.CSSProperties,
+  };
+
   return (
-    <div className="flex w-full h-full items-center justify-center">
-      <div className="flex flex-col space-y-8">
+    <div
+      style={style.draggable}
+      className="absolute z-50 flex w-full h-full items-center justify-center  bg-[#02183D]"
+    >
+      <div className="absolute z-[100] w-full h-full flex flex-1">
+        <div className="absolute h-full w-full flex -top-[300px] left-0 z-[100] bg-gradient-to-br from-[#552092] -from-40% via-[#02183D]"></div>
+        <div className="absolute h-full w-full flex flex-1 -bottom-[300px] right-0 z-[100] bg-gradient-to-tl from-[#0064B6] -from-40% via-[#02183D]"></div>
+      </div>
+      <div className="flex flex-col space-y-8 z-[150]">
         <div className="flex flex-col items-center justify-center">
           <img src={Logo} alt="Tectone" />
           <span className="ml-24 uppercase -mt-4 font-bold text-gray-600">

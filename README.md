@@ -1,10 +1,13 @@
-# Tectone SDK GUI Application
+# Tectone Desktop Application
 
 ## About
 
-Tectone SDK helps the developer setup and scaffold a project quickly with good
+Tectone Desktop helps the developer setup and scaffold a project quickly with good
 default configuration.
 
+Please read more in the [documentation](https://tectone23.github.io) folder.
+
+# For Development
 
 Please read more in the `documentation` folder.
 

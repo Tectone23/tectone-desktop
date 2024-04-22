@@ -15,6 +15,7 @@ import {
 } from "@heroicons/react/20/solid";
 import { Navigate, useNavigate } from "react-router-dom";
 import ContainerControls from "./ContainerControls";
+import { DeleteProjectByID } from "../../wailsjs/go/main/Project";
 
 interface ProjectItemProps {
   project: main.Project;
@@ -82,7 +83,7 @@ export default function ProjectItem({ project }: ProjectItemProps) {
   }
 
   async function deleteProject() {
-    // confirm
+    await DeleteProjectByID(project.id);
   }
 
   function goToProjectView() {

@@ -67,7 +67,50 @@ func (p *Project) GetProjectByID(id string) model.Project {
 
 func (p *Project) DeleteProjectByID(id string) bool {
 	// delete project
-	return false
+	proj := p.GetProjectByID(id)
+
+	// delete containers  and images
+	if err := docker.ComposeRemove(p.ctx, proj.SandboxPath); err != nil {
+		runtime.LogErrorf(p.ctx, "could not delete project containers and images: %s", err)
+		return false
+	}
+
+	// delete project folders
+	if err := filesystem.RemoveDir(proj.Path); err != nil {
+		runtime.LogErrorf(p.ctx, "could not delete project folder: %s", err)
+		return false
+	}
+
+	pc := config.ProjectsConfig{}
+
+	for _, pr := range p.config.Projects {
+		if pr.ID != id {
+			pc.Projects = append(pc.Projects, pr)
+		}
+	}
+
+	p.config = &pc
+
+	b, err := json.Marshal(p.config)
+	if err != nil {
+		estr := fmt.Sprintf("could not marshal project configuration to json: %s", err)
+		runtime.LogError(p.ctx, estr)
+		runtime.EventsEmit(p.ctx, "error", estr)
+		return false
+	}
+
+	n, err := filesystem.Save(p.ctx, config.ConfigFileName, b)
+	if err != nil {
+		estr := fmt.Sprintf("could not save project config to disk: %s", err)
+		runtime.LogErrorf(p.ctx, estr)
+		runtime.EventsEmit(p.ctx, "error", estr)
+		return false
+	}
+
+	runtime.EventsEmit(p.ctx, "info", fmt.Sprintf("Successfully deleted project %s", proj.Name))
+	runtime.LogDebugf(p.ctx, "written configuration file to disk successfully, written %d bytes", n)
+
+	return true
 }
 
 func (p *Project) SetupProject(name, wd string) bool {

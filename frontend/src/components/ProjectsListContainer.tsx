@@ -9,7 +9,7 @@ export default function ProjectList({ projects }: ProjectsListContainerProps) {
   return (
     <>
       <div className="w-full py-8">
-        {projects.length == 0 || !projects ? (
+        {!projects || projects?.length == 0 ? (
           <div className="w-full h-[400px] flex justify-center items-center">
             <div className="border border-gray-700 mx-auto px-32 border-dashed text-gray-500 py-16 rounded-md">
               No projects currently

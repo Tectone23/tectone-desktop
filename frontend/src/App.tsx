@@ -16,10 +16,14 @@ import { useError, useInfo } from "./hooks/useMessaging";
 import InfoBanner from "./components/InfoBanner";
 import Feedback from "./screens/Feedback";
 import FeedbackIframe from "./screens/FeedbackIframe";
+import { model } from "../wailsjs/go/models";
+import { GetAppInfo } from "../wailsjs/go/main/App";
 
 function App() {
   const { error, setError } = useError();
   const { info, setInfo } = useInfo();
+  const [appInfo, setAppInfo] = useState<model.AppInfo | null>(null);
+
   const style = {
     draggable: {
       "--wails-draggable": "drag",
@@ -28,6 +32,15 @@ function App() {
       "--wails-draggable": "no-drag",
     } as React.CSSProperties,
   };
+
+  useEffect(() => {
+    async function getAppInfo() {
+      const ai = await GetAppInfo();
+      setAppInfo(ai);
+    }
+
+    getAppInfo();
+  }, []);
 
   return (
     <div className="mx-auto min-h-screen bg-gray-900  text-gray-400">
@@ -76,11 +89,11 @@ function App() {
       </div>
       <div
         style={style.undraggable}
-        className="flex relative w-full h-screen max-h-screen max-w-full  overflow-x-hidden"
+        className="flex w-full h-screen max-h-screen max-w-full  overflow-x-hidden"
       >
         {error != "" ||
           (info != "" && (
-            <div className="absolute w-[800px] px-20 top-8 z-50 left-[300px] ">
+            <div className="absolute w-[800px] px-20 top-16 z-50 left-[300px] ">
               {error != "" && (
                 <ErrorBanner onAbort={() => setError("")} error={error} />
               )}
@@ -93,21 +106,32 @@ function App() {
         {/* <div className="absolute right-12 top-20 w-full">
           <ErrorBanner error="file could not be uploaded" />
         </div> */}
-        <div className="flex h-full w-full">
-          <HashRouter basename="/">
-            <Routes>
-              <Route path="/" element={<Splash />} />
-              <Route path="/projects" element={<Home />} />
-              <Route path="/newProject" element={<NewProject />} />
-              <Route path="/sandbox" element={<Sandbox />} />
-              <Route path="/containers" element={<Containers />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/feedback" element={<FeedbackIframe />} />
+        <div className="flex flex-col h-full w-full">
+          <div className="flex h-full w-full">
+            <HashRouter basename="/">
+              <Routes>
+                <Route path="/" element={<Splash />} />
+                <Route path="/projects" element={<Home />} />
+                <Route path="/newProject" element={<NewProject />} />
+                <Route path="/sandbox" element={<Sandbox />} />
+                <Route path="/containers" element={<Containers />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/feedback" element={<FeedbackIframe />} />
 
-              <Route path="/project-view" element={<ProjectView />} />
-              <Route path="/project-settings" element={<ProjectSettings />} />
-            </Routes>
-          </HashRouter>
+                <Route path="/project-view" element={<ProjectView />} />
+                <Route path="/project-settings" element={<ProjectSettings />} />
+              </Routes>
+            </HashRouter>
+          </div>
+          <div className="w-full h-10 bg-gray-900 flex justify-between px-4 text-[12px] items-center text-gray-400">
+            {appInfo && (
+              <>
+                <div>Build Date: {appInfo.build_date}</div>
+                <div>Commit Hash: {appInfo.commit_hash}</div>
+                <div>Build Version: {appInfo.version}</div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
